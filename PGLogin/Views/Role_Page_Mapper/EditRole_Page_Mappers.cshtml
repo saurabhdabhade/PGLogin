@@ -1,0 +1,44 @@
+﻿@model PGLogin.Models.Role_Page_Mapper
+
+@{
+    ViewData["Title"] = "EditRole_Page_Mappers";
+}
+
+<h1>EditRole_Page_Mappers</h1>
+
+<h4>Role_Page_Mapper</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="EditRole_Page_Mappers">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Role_Page_ID" />
+            <div class="form-group">
+                <label asp-for="Role_Id" class="control-label"></label>
+                <select asp-for="Role_Id" class="form-control" asp-items="ViewBag.Role_Id"></select>
+                <span asp-validation-for="Role_Id" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Page_Id" class="control-label"></label>
+                <select asp-for="Page_Id" class="form-control" asp-items="ViewBag.Page_Id"></select>
+                <span asp-validation-for="Page_Id" class="text-danger"></span>
+            </div>
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="IsActive" /> @Html.DisplayNameFor(model => model.IsActive)
+                </label>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

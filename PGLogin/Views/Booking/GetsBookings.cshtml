@@ -1,0 +1,95 @@
+﻿@model IEnumerable<PGLogin.Models.Booking>
+
+@{
+    ViewData["Title"] = "Bookings";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet" />
+
+<style>
+    body {
+        background: #f5f6fa;
+    }
+
+    .booking-card {
+        transition: all 0.3s ease;
+        border-radius: 15px;
+    }
+
+        .booking-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+    .badge-active {
+        background-color: #28a745 !important;
+    }
+
+    .badge-inactive {
+        background-color: #dc3545 !important;
+    }
+</style>
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="fw-bold text-primary">Bookings</h2>
+        <a asp-action="CreateBooking" class="btn btn-primary shadow-sm">
+            <i class="bi bi-plus-circle"></i> Create New Booking
+        </a>
+    </div>
+
+    <div class="row g-4">
+        @foreach (var item in Model)
+        {
+            <div class="col-md-4">
+                <div class="card booking-card shadow-sm">
+                    <div class="card-body">
+
+                        <h5 class="card-title fw-bold">
+                            <i class="bi bi-person-circle"></i> Candidate: @item.CandidateId
+                        </h5>
+
+                        <p class="text-secondary mb-2">
+                            <i class="bi bi-door-open"></i>
+                            <strong>Room:</strong> @item.RoomId
+                        </p>
+
+                        <p class="mb-1">
+                            <strong>Start Date:</strong> @item.StartDate.ToString("dd-MMM-yyyy")
+                        </p>
+                        <p class="mb-2">
+                            <strong>End Date:</strong> @(item.EndDate?.ToString("dd-MMM-yyyy") ?? "N/A")
+                        </p>
+
+                        <span class="badge px-3 py-2 @(item.Active ? "badge-active" : "badge-inactive")">
+                            @(item.Active ? "Active" : "Inactive")
+                        </span>
+
+                        <p class="mt-3">
+                            <strong>Security Deposit:</strong> ₹@item.SecurityDeposit
+                        </p>
+
+                        <p class="mt-4">
+                            <strong>Seats:</strong> @item.Seats
+                        </p>
+
+                        <div class="mt-3 d-flex gap-3">
+                            <a asp-action="EditRoom" asp-route-id="@item.BookingId" class="text-primary fw-bold">
+                                <i class="bi bi-pencil-square"></i> Edit
+                            </a>
+                            <a asp-action="Details" asp-route-id="@item.BookingId" class="text-info fw-bold">
+                                <i class="bi bi-info-circle"></i> Details
+                            </a>
+                            <a asp-action="DeleteBooking" asp-route-id="@item.BookingId" class="text-danger fw-bold">
+                                <i class="bi bi-trash"></i> Delete
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,280 @@
+﻿@model IEnumerable<PGLogin.Models.Room>
+
+@{
+    ViewData["Title"] = "Available Rooms";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
+
+<style>
+    body {
+        background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+        background-attachment: fixed;
+        font-family: 'Poppins', sans-serif;
+        color: #fff;
+    }
+
+    /* Magical Header */
+    .page-header {
+        text-align: center;
+        padding: 40px 0;
+    }
+
+    .page-header h2 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: linear-gradient(90deg, #4facfe, #00f2fe);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        filter: drop-shadow(0 0 10px rgba(79, 172, 254, 0.6));
+    }
+
+    .page-header p {
+        font-size: 1rem;
+        color: #b8c2ff;
+    }
+
+    /* Add Room Button */
+    .add-room-btn {
+        background: linear-gradient(90deg, #ff6bcb, #ff8e53);
+        color: #fff !important;
+        padding: 12px 22px;
+        font-weight: 600;
+        border-radius: 14px;
+        box-shadow: 0px 6px 18px rgba(255, 107, 203, 0.4);
+        transition: 0.3s ease;
+    }
+
+    .add-room-btn:hover {
+        transform: translateY(-4px) scale(1.03);
+        box-shadow: 0px 10px 25px rgba(255, 107, 203, 0.6);
+    }
+
+    /* Premium Room Cards */
+    .property-card {
+        border-radius: 22px;
+        padding-bottom: 10px;
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(18px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        transition: 0.35s ease;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .property-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 25px 80px rgba(0, 0, 0, 0.45);
+    }
+
+    .property-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.15), transparent);
+        pointer-events: none;
+    }
+
+    .property-image {
+        width: 100%;
+        height: 240px;
+        object-fit: cover;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    /* Titles */
+    .card-body h5 {
+        color: #fff;
+        text-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
+        font-size: 1.3rem;
+        font-weight: 700;
+    }
+
+    /* Status Badges */
+    .badge-status {
+        padding: 8px 16px;
+        border-radius: 30px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #fff;
+        text-shadow: 0 0 10px rgba(0,0,0,0.4);
+        box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+
+    .badge-Available {
+        background: linear-gradient(90deg, #00c851, #32ff7e);
+    }
+
+    .badge-Occupied {
+        background: linear-gradient(90deg, #ff416c, #ff4b2b);
+    }
+
+    .badge-Maintenance {
+        background: linear-gradient(90deg, #f6d365, #fda085);
+    }
+
+    /* Card Buttons */
+    .property-actions a {
+        border-radius: 12px;
+        padding: 9px 16px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: 0.25s;
+        color: #fff;
+    }
+
+    .property-actions a:hover {
+        transform: translateY(-3px) scale(1.05);
+    }
+
+    .btn-warning {
+        background: linear-gradient(90deg, #f7971e, #ffd200);
+        border: none;
+    }
+
+    .btn-info {
+        background: linear-gradient(90deg, #4facfe, #00f2fe);
+        border: none;
+    }
+
+    .btn-danger {
+        background: linear-gradient(90deg, #ff512f, #dd2476);
+        border: none;
+    }
+
+    /* Pagination */
+    .pagination .page-link {
+        border-radius: 12px;
+        padding: 10px 16px;
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.15);
+        color: #fff;
+        backdrop-filter: blur(10px);
+        transition: 0.25s;
+    }
+
+    .pagination .page-item.active .page-link {
+        background: linear-gradient(90deg, #4facfe, #00f2fe);
+        border: none;
+    }
+
+    .pagination .page-link:hover {
+        background: rgba(255,255,255,0.2);
+    }
+
+    .no-data {
+        margin-top: 40px;
+        color: #fff;
+    }
+</style>
+
+
+<div class="container py-4">
+
+    <div class="page-header">
+        <h2>✨ Find Your Perfect Room</h2>
+        <p>Beautifully crafted, ultra-premium room listings.</p>
+
+        <a asp-action="CreateRoom" class="add-room-btn">+ Add Room</a>
+    </div>
+
+    <div class="row g-4">
+
+        @if (Model != null && Model.Any())
+        {
+            foreach (var item in Model)
+            {
+                string imageSrc;
+
+                if (!string.IsNullOrEmpty(item.ImagePath))
+                {
+                    if (item.ImagePath.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                        imageSrc = item.ImagePath;
+                    else
+                        imageSrc = Url.Content(item.ImagePath.StartsWith("/") ? item.ImagePath : "/" + item.ImagePath);
+                }
+                else
+                {
+                    imageSrc = Url.Content("~/images/OIPG.webp");
+                }
+
+                <div class="col-md-4">
+                    <div class="property-card">
+
+                        <img src="@imageSrc" class="property-image" />
+
+                        <div class="card-body p-4">
+                            <h5>Room @item.RoomNumber</h5>
+
+                            <span class="badge badge-status badge-@item.Status">
+                                @item.Status
+                            </span>
+
+                            <p class="mt-3" readonly><strong>Seats:</strong> @ViewBag.Seats</p>
+                            <p class="mt-2 text-light">@item.Notes</p>
+                        </div>
+
+                        <div class="property-actions p-3 d-flex justify-content-between">
+                            <a asp-action="EditRoom" asp-route-id="@item.RoomId" class="btn btn-warning">
+                                <i class="bi bi-pencil-square"></i> Edit
+                            </a>
+
+                            <a asp-action="CreateBooking" asp-controller="Booking" class="btn btn-info">
+                                <i class="bi bi-eye"></i> Book
+                            </a>
+                            <a asp-action="Details" asp-route-id="@item.RoomId" class="btn btn-warning">
+                                <i class="bi bi-pencil-square"></i> Details
+                            </a>
+                            <a asp-action="Delete" asp-route-id="@item.RoomId" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> Delete
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12 text-center no-data">
+                <i class="bi bi-exclamation-circle display-6 d-block mb-2"></i>
+                <h5>No rooms available</h5>
+                <p class="text-light">Add rooms to display them here.</p>
+            </div>
+        }
+    </div>
+
+    <!-- Pagination -->
+    <nav>
+        <ul class="pagination justify-content-center mt-4">
+
+            <li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
+                <a class="page-link"
+                   href="@Url.Action("GetsRooms", new { page = ViewBag.CurrentPage - 1, pageSize = ViewBag.PageSize })">
+                    Previous
+                </a>
+            </li>
+
+            @for (int i = 1; i <= ViewBag.TotalPages; i++)
+            {
+                <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                    <a class="page-link"
+                       href="@Url.Action("GetsRooms", new { page = i, pageSize = ViewBag.PageSize })">
+                        @i
+                    </a>
+                </li>
+            }
+
+            <li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
+                <a class="page-link"
+                   href="@Url.Action("GetsRooms", new { page = ViewBag.CurrentPage + 1, pageSize = ViewBag.PageSize })">
+                    Next
+                </a>
+            </li>
+
+        </ul>
+    </nav>
+</div>
+

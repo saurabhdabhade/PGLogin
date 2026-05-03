@@ -1,0 +1,567 @@
+﻿@model List<PG>
+@{
+    var cities = ViewBag.Cities as List<City>;
+    var areas = ViewBag.Areas as List<Area>;
+    // URL that returns JSON list of PGs based on query string (CityId, AreaId, MaxPrice, SharingType).
+    var ajaxUrl = Url.Action("SearchAjax", "PG"); // <-- ensure this exists and returns JSON
+    var fallbackAction = Url.Action("Search", "PG"); // server-side fallback
+}
+
+<!--------------------------
+  Styles & Fonts (single-file)
+--------------------------->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --bg: #f6f8ff;
+        --card: #ffffff;
+        --muted: #64748b;
+        --accent: #4F46E5;
+        --glass: rgba(255,255,255,0.55);
+        --shadow: 0 10px 30px rgba(2,6,23,0.08);
+    }
+
+    [data-theme="dark"] {
+        --bg: #0b1220;
+        --card: #071026;
+        --muted: #94a3b8;
+        --accent: #7c3aed;
+        --glass: rgba(255,255,255,0.03);
+        --shadow: 0 10px 30px rgba(2,6,23,0.6);
+    }
+
+    * {
+        box-sizing: border-box;
+        font-family: 'Poppins',system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
+    }
+
+    body {
+        margin: 0;
+        background: linear-gradient(180deg,var(--bg), #e9eefc);
+        min-height: 100vh;
+        color: var(--muted);
+        transition: background .35s ease,color .35s ease;
+        padding: 24px;
+    }
+
+    /* Container */
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    /* Header */
+    .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 18px;
+    }
+
+    .brand {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .logo {
+        width: 56px;
+        height: 56px;
+        border-radius: 12px;
+        background: linear-gradient(135deg,var(--accent), #06b6d4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        box-shadow: var(--shadow);
+    }
+
+    .title {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--accent);
+    }
+
+    .subtitle {
+        font-size: 13px;
+        color: var(--muted);
+        margin-top: 2px;
+    }
+
+    /* Controls card */
+    .controls {
+        background: linear-gradient(180deg,var(--card), rgba(255,255,255,0.6));
+        border-radius: 14px;
+        padding: 18px;
+        box-shadow: var(--shadow);
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        align-items: end;
+    }
+    @@media (max-width:900px) {
+        .controls {
+            grid-template-columns: repeat(2,1fr);
+        }
+    }
+    @@media (max-width:560px) {
+        .controls {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Animated dropdown */
+    .select-animated {
+        position: relative;
+    }
+
+        .select-animated select {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 1px solid rgba(99,102,241,0.08);
+            background: linear-gradient(180deg,var(--glass), rgba(255,255,255,0.02));
+            outline: none;
+            transition: transform .18s ease, box-shadow .18s ease;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+            .select-animated select:focus {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 20px rgba(79,70,229,0.12);
+            }
+
+        .select-animated .chev {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            opacity: .9;
+        }
+
+    /* price input */
+    .input-num {
+        padding: 12px 14px;
+        border-radius: 10px;
+        border: 1px solid rgba(99,102,241,0.08);
+    }
+
+    /* Search button */
+    .btn-search {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 18px;
+        border-radius: 12px;
+        border: none;
+        cursor: pointer;
+        color: white;
+        background: linear-gradient(90deg,var(--accent), #06b6d4);
+        font-weight: 600;
+        box-shadow: 0 8px 30px rgba(79,70,229,0.18);
+    }
+
+        .btn-search:active {
+            transform: scale(.995);
+        }
+
+    /* results header */
+    .results-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 18px 0;
+    }
+
+    /* cards grid */
+    .cards {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+    }
+    @@media (max-width:1100px) {
+        .cards {
+            grid-template-columns: repeat(2,1fr);
+        }
+    }
+    @@media (max-width:640px) {
+        .cards {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .card {
+        background: var(--card);
+        border-radius: 14px;
+        padding: 14px;
+        box-shadow: var(--shadow);
+        transition: transform .25s ease, box-shadow .25s ease;
+        display: flex;
+        gap: 12px;
+        overflow: hidden;
+    }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 18px 40px rgba(2,6,23,0.18);
+        }
+
+    .card-img {
+        min-width: 140px;
+        height: 110px;
+        border-radius: 10px;
+        background: linear-gradient(180deg,#dbeafe, #f8fafc);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #0f172a;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    .card-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .pg-title {
+        font-weight: 700;
+        font-size: 16px;
+        color: var(--accent);
+        margin-bottom: 6px;
+    }
+
+    .pg-meta {
+        font-size: 13px;
+        color: var(--muted);
+        margin-bottom: 10px;
+    }
+
+    .pg-price {
+        font-weight: 800;
+        color: #0f172a;
+        font-size: 18px;
+    }
+
+    .badges {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .badge {
+        background: rgba(99,102,241,0.1);
+        color: var(--accent);
+        padding: 6px 8px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 12px;
+    }
+
+    /* Empty state */
+    .empty {
+        text-align: center;
+        padding: 40px;
+        color: var(--muted);
+    }
+
+    /* Theme toggle */
+    .theme-toggle {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    /* subtle loader */
+    .loader {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 4px solid rgba(0,0,0,0.06);
+        border-top-color: var(--accent);
+        animation: spin 0.9s linear infinite;
+    }
+    @@keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+
+<div class="container" data-theme="light" id="page-root">
+
+    <div class="header">
+        <div class="brand">
+            <div class="logo">PG</div>
+            <div>
+                <div class="title">Find Premium PGs</div>
+                <div class="subtitle">Refined search, instantly — booking-like cards</div>
+            </div>
+        </div>
+
+        <div style="display:flex; gap:10px; align-items:center;">
+            <div class="theme-toggle" title="Toggle theme">
+                <label style="font-size:13px; color:var(--muted);">Theme</label>
+                <button id="toggleTheme" class="btn-search" style="padding:8px 12px; font-size:13px; background:transparent; color:var(--accent); border:1px solid rgba(79,70,229,0.12); box-shadow:none;">Toggle</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Controls -->
+    <form id="searchForm" action="@fallbackAction" method="get" class="controls" onsubmit="return false;">
+        <div class="select-animated">
+            <label class="fw-semibold" style="font-size:12px; color:var(--muted); margin-bottom:6px; display:block;">City</label>
+            <select name="CityId" id="CityId">
+                <option value="">Any City</option>
+                @foreach (var c in cities)
+                {
+                    <option value="@c.City_Id">@c.City_Name</option>
+                }
+            </select>
+            <div class="chev">▾</div>
+        </div>
+
+        <div class="select-animated">
+            <label class="fw-semibold" style="font-size:12px; color:var(--muted); margin-bottom:6px; display:block;">Area</label>
+            <select name="AreaId" id="AreaId">
+                <option value="">Any Area</option>
+                @foreach (var a in areas)
+                {
+                    <option value="@a.AreaId">@a.AreaName</option>
+                }
+            </select>
+            <div class="chev">▾</div>
+        </div>
+
+        <div>
+            <label class="fw-semibold" style="font-size:12px; color:var(--muted); margin-bottom:6px; display:block;">Max Price (₹)</label>
+            <input type="number" name="MaxPrice" id="MaxPrice" class="input-num" placeholder="e.g. 8000" min="0" />
+        </div>
+
+        <div>
+            <label class="fw-semibold" style="font-size:12px; color:var(--muted); margin-bottom:6px; display:block;">Sharing</label>
+            <select name="SharingType" id="SharingType">
+                <option value="">Any</option>
+                <option value="1">1 Sharing</option>
+                <option value="2">2 Sharing</option>
+                <option value="3">3 Sharing</option>
+                <option value="4">4 Sharing</option>
+            </select>
+        </div>
+
+        <!-- full-width search button -->
+        <div style="grid-column: 1 / -1; display:flex; gap:10px; margin-top:6px;">
+            <button id="btnSearch" asp-controller="PG" asp-action="GetsPGs" class="btn-search" type="button" style="flex:1;">
+                🔎 Search instantly
+            </button>
+            <button id="btnReset" type="button" style="padding:12px 14px; border-radius:12px; background:transparent; border:1px solid rgba(99,102,241,0.08); color:var(--muted);">Reset</button>
+        </div>
+    </form>
+
+    <!-- Results head -->
+    <div class="results-head">
+        <div>
+            <h3 style="margin:0; color:var(--accent);">Results</h3>
+            <div style="font-size:13px; color:var(--muted); margin-top:4px;" id="resultsSummary">Showing top results</div>
+        </div>
+        <div id="loadingWrap" style="display:flex; align-items:center; gap:8px;">
+            <div id="loader" class="loader" style="display:none;"></div>
+        </div>
+    </div>
+
+    <!-- Cards -->
+    <div id="cardsWrap" class="cards" aria-live="polite">
+        @* If model was passed server-side initially, render it as cards for progressive enhancement *@
+        @if (Model != null && Model.Count > 0)
+        {
+            foreach (var pg in Model)
+            {
+                <div class="card">
+                    <div class="card-img">IMG</div>
+                    <div class="card-body">
+                        <div>
+                            <div class="pg-title">@pg.PG_Name</div>
+                            <div class="pg-meta">@pg.Area.AreaName • @pg.Area.City.City_Name</div>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+                            <div>
+                                <div class="pg-price">₹@pg.Price / month</div>
+                                <div class="badges" style="margin-top:6px;">
+                                    <div class="badge">@pg.SharingType - Sharing</div>
+                                </div>
+                            </div>
+                            <div style="display:flex; flex-direction:column; gap:8px; align-items:flex-end;">
+                                <a href="@Url.Action("Details", "PG", new { id = pg.PG_Id })" class="btn-search" style="padding:8px 12px; font-size:13px;">View</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="empty" id="emptyState">Use the filters and click Search to find PGs.</div>
+        }
+    </div>
+
+</div>
+
+<script>
+    (function(){
+      const ajaxUrl = '@ajaxUrl';
+      const pageRoot = document.getElementById('page-root');
+      const btn = document.getElementById('btnSearch');
+      const reset = document.getElementById('btnReset');
+      const loader = document.getElementById('loader');
+      const cardsWrap = document.getElementById('cardsWrap');
+      const resultsSummary = document.getElementById('resultsSummary');
+      const emptyState = document.getElementById('emptyState');
+
+      // Theme init
+      const storedTheme = localStorage.getItem('pg_theme') || 'light';
+      setTheme(storedTheme);
+
+      document.getElementById('toggleTheme').addEventListener('click', function(){
+        const current = pageRoot.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+        const next = current === 'dark' ? 'light' : 'dark';
+        setTheme(next);
+        localStorage.setItem('pg_theme', next);
+      });
+
+      function setTheme(t){
+        pageRoot.setAttribute('data-theme', t);
+      }
+
+      // Build query object
+      function readFilters(){
+        return {
+          CityId: document.getElementById('CityId').value || '',
+          AreaId: document.getElementById('AreaId').value || '',
+          MaxPrice: document.getElementById('MaxPrice').value || '',
+          SharingType: document.getElementById('SharingType').value || ''
+        };
+      }
+
+      // Render cards from JSON
+      function renderCards(items){
+        cardsWrap.innerHTML = '';
+        if(!items || items.length === 0){
+          resultsSummary.textContent = 'No results found';
+          cardsWrap.innerHTML = '<div class="empty">No PGs match your filters.</div>';
+          return;
+        }
+        resultsSummary.textContent = `Showing ${items.length} result${items.length>1?'s':''}`;
+        const frag = document.createDocumentFragment();
+        items.forEach(p => {
+          const div = document.createElement('div');
+          div.className = 'card';
+          div.innerHTML = `
+            <div class="card-img">${p.ImagePlaceholder || 'IMG'}</div>
+            <div class="card-body">
+              <div>
+                <div class="pg-title">${escapeHtml(p.PG_Name || 'Untitled')}</div>
+                <div class="pg-meta">${escapeHtml((p.Area && p.Area.AreaName) || '')} • ${escapeHtml((p.Area && p.Area.City && p.Area.City.City_Name) || '')}</div>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+                <div>
+                  <div class="pg-price">₹${p.Price || '—'} / month</div>
+                  <div class="badges" style="margin-top:6px;">
+                    <div class="badge">${p.SharingType || '—'} Sharing</div>
+                  </div>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:8px; align-items:flex-end;">
+                  <a href="/PG/Details/${p.PG_Id}" class="btn-search" style="padding:8px 12px; font-size:13px;">View</a>
+                </div>
+              </div>
+            </div>
+          `;
+          frag.appendChild(div);
+        });
+        cardsWrap.appendChild(frag);
+      }
+
+      // minimal HTML-escape
+      function escapeHtml(str){
+        if(!str) return '';
+        return String(str).replace(/[&<>"']/g, function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]; });
+      }
+
+      // Show/Hide loader
+      function setLoading(on){
+        loader.style.display = on ? 'block' : 'none';
+      }
+
+      // debounce helper
+      function debounce(fn, wait){
+        let t;
+        return function(){ clearTimeout(t); t = setTimeout(()=>fn.apply(this,arguments), wait); }
+      }
+
+      // perform AJAX search (GET with querystring)
+      async function doSearch(){
+        const q = readFilters();
+        // build querystring
+        const params = new URLSearchParams();
+        if(q.CityId) params.append('CityId', q.CityId);
+        if(q.AreaId) params.append('AreaId', q.AreaId);
+        if(q.MaxPrice) params.append('MaxPrice', q.MaxPrice);
+        if(q.SharingType) params.append('SharingType', q.SharingType);
+
+        setLoading(true);
+        try {
+          const resp = await fetch(ajaxUrl + '?' + params.toString(), {
+            headers: { 'Accept': 'application/json' },
+            credentials: 'same-origin'
+          });
+          if(!resp.ok) throw new Error('Server error');
+          const data = await resp.json();
+          renderCards(data);
+        } catch(e){
+          console.error('Search failed', e);
+          cardsWrap.innerHTML = '<div class="empty">Could not load results — try refreshing the page.</div>';
+        } finally {
+          setLoading(false);
+        }
+      }
+
+      // wire up events
+      btn.addEventListener('click', doSearch);
+      reset.addEventListener('click', function(){
+        document.getElementById('CityId').value = '';
+        document.getElementById('AreaId').value = '';
+        document.getElementById('MaxPrice').value = '';
+        document.getElementById('SharingType').value = '';
+        doSearch();
+      });
+
+      // animated dropdowns: search on change (debounced)
+      const onChangeSearch = debounce(doSearch, 450);
+      document.getElementById('CityId').addEventListener('change', onChangeSearch);
+      document.getElementById('AreaId').addEventListener('change', onChangeSearch);
+      document.getElementById('SharingType').addEventListener('change', onChangeSearch);
+      document.getElementById('MaxPrice').addEventListener('input', debounce(doSearch, 600));
+
+      // initial load: if the server rendered model was empty, try an initial query after load
+      window.addEventListener('DOMContentLoaded', function(){
+        // if there are no server cards, do an initial quick search to populate
+        const hasServerCards = !!document.querySelectorAll('.card').length && !document.querySelector('.empty');
+        if(!hasServerCards){
+          doSearch();
+        } else {
+          // update summary count if server rendered items
+          const count = document.querySelectorAll('.card').length;
+          resultsSummary.textContent = `Showing ${count} result${count>1?'s':''}`;
+        }
+      });
+
+    })();
+</script>

@@ -1,0 +1,126 @@
+﻿@model IEnumerable<PGLogin.Models.Register>
+
+@{
+	ViewData["Title"] = "Registered Users";
+}
+
+<div class="container mt-4">
+	<div class="card shadow-lg border-0 rounded-4">
+		<div class="card-header bg-primary text-white d-flex justify-content-between align-items-center rounded-top-4">
+			<h4 class="mb-0"><i class="bi bi-people-fill me-2"></i> Registered Users</h4>
+			<a asp-action="Create" class="btn btn-light btn-sm fw-semibold shadow-sm">
+				<i class="bi bi-person-plus me-1"></i> Create New
+			</a>
+		</div>
+
+		<div class="card-body bg-light">
+			<div class="table-responsive">
+				<table class="table table-hover align-middle text-center">
+					<thead class="table-primary">
+						<tr>
+							<th>@Html.DisplayNameFor(model => model.First_Name)</th>
+							<th>@Html.DisplayNameFor(model => model.Last_Name)</th>
+							<th>@Html.DisplayNameFor(model => model.Email)</th>
+							<th>@Html.DisplayNameFor(model => model.Password)</th>
+							<th>@Html.DisplayNameFor(model => model.Confirm_Password)</th>
+							<th>@Html.DisplayNameFor(model => model.LastPassword1)</th>
+							<th>@Html.DisplayNameFor(model => model.LastPassword2)</th>
+							<th>@Html.DisplayNameFor(model => model.EventDateTime)</th>
+							<th>@Html.DisplayNameFor(model => model.IsDeleted)</th>
+							<th>Actions</th>
+						</tr>
+					</thead>
+					<tbody>
+						@foreach (var item in Model)
+						{
+							<tr>
+								<td>@Html.DisplayFor(modelItem => item.First_Name)</td>
+								<td>@Html.DisplayFor(modelItem => item.Last_Name)</td>
+								<td>@Html.DisplayFor(modelItem => item.Email)</td>
+								<td>@Html.DisplayFor(modelItem => item.Password)</td>
+								<td>@Html.DisplayFor(modelItem => item.Confirm_Password)</td>
+								<td>@Html.DisplayFor(modelItem => item.LastPassword1)</td>
+								<td>@Html.DisplayFor(modelItem => item.LastPassword2)</td>
+								<td>
+									@item.EventDateTime.ToString("dd MMM yyyy, hh:mm tt")
+								</td>
+								<td>
+									@if (item.IsDeleted)
+									{
+										<span class="badge bg-danger px-3 py-2">Deleted</span>
+									}
+									else
+									{
+										<span class="badge bg-success px-3 py-2">Active</span>
+									}
+								</td>
+								<td>
+									<div class="btn-group" role="group">
+										<a asp-action="Edit" asp-route-id="@item.RegisterID" class="btn btn-sm btn-outline-primary">
+											<i class="bi bi-pencil-square"></i>
+										</a>
+										<a asp-action="Details" asp-route-id="@item.RegisterID" class="btn btn-sm btn-outline-info">
+											<i class="bi bi-info-circle"></i>
+										</a>
+										<a asp-action="Delete" asp-route-id="@item.RegisterID" class="btn btn-sm btn-outline-danger">
+											<i class="bi bi-trash3"></i>
+										</a>
+										<a asp-action="GetsRooms" asp-controller="Room" class="btn btn-sm btn-outline-success">
+											<i class="bi bi-door-open"></i>
+										</a>
+									</div>
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+	<nav>
+		<ul class="pagination justify-content-center mt-4">
+
+			<li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
+				<a class="page-link"
+				   href="@Url.Action("GetsRooms", new { page = ViewBag.CurrentPage - 1, pageSize = ViewBag.PageSize })">
+					Previous
+				</a>
+			</li>
+
+			@for (int i = 1; i <= ViewBag.TotalPages; i++)
+			{
+				<li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+					<a class="page-link"
+					   href="@Url.Action("GetsRooms", new { page = i, pageSize = ViewBag.PageSize })">
+						@i
+					</a>
+				</li>
+			}
+
+			<li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
+				<a class="page-link"
+				   href="@Url.Action("GetsRooms", new { page = ViewBag.CurrentPage + 1, pageSize = ViewBag.PageSize })">
+					Next
+				</a>
+			</li>
+
+		</ul>
+	</nav>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+	document.addEventListener('DOMContentLoaded', function () {
+		var form = document.getElementById('myform');
+		form.addEventListener('submit', function (event) {
+			var confirmed = confirm('Are you sure you want to Register Our Site?');
+			if (!confirmed) {
+				event.preventDefault(); // Cancel form submission if not confirmed
+			}
+		});
+	});
+</script>
+@section Scripts {
+	@{
+		await Html.RenderPartialAsync("_ValidationScriptsPartial");
+	}
+}

@@ -1,0 +1,184 @@
+﻿@model PGLogin.Models.Register
+
+@{
+    ViewData["Title"] = "Reset Password";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Reset Password</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #4e54c8, #8f94fb);
+        }
+
+        /* Floating Circles */
+        .circle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(4px);
+            animation: float 8s infinite ease-in-out;
+        }
+
+            .circle:nth-child(1) {
+                width: 260px;
+                height: 260px;
+                top: -80px;
+                left: -60px;
+            }
+
+            .circle:nth-child(2) {
+                width: 200px;
+                height: 200px;
+                bottom: -60px;
+                right: -40px;
+                animation-delay: 2s;
+            }
+
+        @@keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-25px);
+            }
+        }
+
+        /* Glass Card */
+        .container {
+            position: relative;
+            width: 360px;
+            padding: 35px 30px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 18px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+            color: #fff;
+            animation: fadeIn 0.8s ease;
+        }
+
+        @@keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(25px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h2 {
+            margin: 0 0 15px;
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: 500;
+            color: #f1f1f1;
+        }
+
+        input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            margin-top: 6px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.4);
+            background: rgba(255,255,255,0.25);
+            color: #fff;
+            font-size: 1rem;
+        }
+
+        input::placeholder {
+            color: #ebebeb;
+        }
+
+        input:focus {
+            outline: none;
+            background: rgba(255,255,255,0.3);
+            box-shadow: 0 0 10px rgba(255,255,255,0.4);
+        }
+
+        button {
+            margin-top: 20px;
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(90deg, #6a11cb, #2575fc);
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #fff;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+            button:hover {
+                transform: scale(1.05);
+                box-shadow: 0 10px 25px rgba(37,117,252,0.4);
+            }
+
+        .back-link {
+            display: block;
+            margin-top: 15px;
+            text-align: center;
+            color: #fff;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+            .back-link:hover {
+                text-decoration: underline;
+            }
+    </style>
+</head>
+
+<body>
+
+    <div class="circle"></div>
+    <div class="circle"></div>
+
+    <div class="container">
+        <h2>Reset Password 🔐</h2>
+
+        <form asp-action="ResetPassword" asp-controller="Register" method="post">
+            <input type="hidden" asp-for="Email" />
+
+            <label>New Password</label>
+            <input type="password" id="newPassword" name="newPassword" placeholder="Enter new password" required />
+
+            <label>Confirm Password</label>
+            <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Re-enter password" required />
+
+            <button type="submit">Reset Password</button>
+        </form>
+
+        <a class="back-link" href="/Register/Logins">← Back to Login</a>
+    </div>
+
+</body>
+
+</html>
+
+@section Scripts {
+    @@await Html.RenderPartialAsync("_ValidationScriptsPartial")
+}

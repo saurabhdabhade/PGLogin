@@ -1,0 +1,79 @@
+﻿@model PGLogin.Models.City
+
+@{
+	ViewData["Title"] = "CreateCity";
+}
+
+<h1>Create City</h1>
+
+<hr />
+<div class="row">
+	<div class="col-md-6">
+		<form asp-action="CreateCity">
+			<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+			<!-- City Name -->
+			<div class="form-group">
+				<label asp-for="City_Name" class="control-label"></label>
+				<input asp-for="City_Name" class="form-control" />
+				<span asp-validation-for="City_Name" class="text-danger"></span>
+			</div>
+
+			<!-- AREA LIST -->
+			<div class="form-group">
+				<label>Areas</label>
+
+				<div id="areaList">
+					<label asp-for="AreaName" class="control-label"></label>
+										<!-- First area field by default -->
+					<div class="input-group mb-2">
+                        <input type="text" name="AreaName[0]" class="form-control" />
+                        <button type="button" class="btn btn-danger removeAreaBtn">X</button>
+                    </div>
+				</div>
+
+				<button type="button" id="addAreaBtn" class="btn btn-success mt-2">Add New Area</button>
+			</div>
+
+			<div class="form-group mt-3">
+				<input type="submit" value="Create" class="btn btn-primary" />
+			</div>
+		</form>
+	</div>
+</div>
+
+<div>
+	<a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+	@{
+		await Html.RenderPartialAsync("_ValidationScriptsPartial");
+	}
+
+	<script>
+        let areaIndex = 0; // start indexing after the first input
+
+        document.getElementById("addAreaBtn").addEventListener("click", function () {
+            const areaList = document.getElementById("areaList");
+
+            const newArea = document.createElement("div");
+            newArea.classList.add("input-group", "mb-2");
+
+            newArea.innerHTML = `
+                <input type="text" name="AreaName[${areaIndex}]" class="form-control" />
+                <button type="button" class="btn btn-danger removeAreaBtn">X</button>
+            `;
+
+            areaList.appendChild(newArea);
+            areaIndex++;
+        });
+
+        // Remove area field
+        document.addEventListener("click", function (e) {
+            if (e.target.classList.contains("removeAreaBtn")) {
+                e.target.parentElement.remove();
+            }
+        });
+    </script>
+}

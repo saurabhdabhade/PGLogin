@@ -1,0 +1,47 @@
+﻿@model IEnumerable<PGLogin.Models.Role_Page_Mapper>
+
+@{
+    ViewData["Title"] = "GetAllRole_Page_Mappers";
+}
+
+<h1>GetAllRole_Page_Mappers</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Role_Master)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Page_Master)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IsActive)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Role_Master.Admin)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Page_Master.Page_Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.IsActive)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Role_Page_ID">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.Role_Page_ID">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.Role_Page_ID">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
